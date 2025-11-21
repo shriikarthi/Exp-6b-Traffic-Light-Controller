@@ -17,15 +17,89 @@ Type the Verilog code for the Traffic Light Controler
 Observe the Traffic Signal output.
 
 # code
+```verilog
+module traffic_light_controller(
+    input clk, rst,
+    output reg [2:0] light
+);
+    parameter [1:0] RED = 2'b00, GREEN = 2'b01, YELLOW = 2'b10;
+    reg [1:0] state;
+    reg [3:0] count;
 
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            state <= RED;
+            count <= 0;
+        end
+          else begin
+            count <= count + 1;
+            case (state)
+                RED: begin
+                    if (count == 3) begin
+                        state <= GREEN;
+                        count <= 0;
+                    end
+                end
+                GREEN: begin
+                    if (count == 5) begin
+                        state <= YELLOW;
+                        count <= 0;
+                    end
+                end
+                YELLOW: begin
+                    if (count == 1) begin
+                        state <= RED;
+                        count <= 0;
+                    end
+                end
+            endcase
+        end
+    end
 
-# Tes Bench
+    always @(*) begin
+        case (state)
+            RED: light = 3'b100;
+            YELLOW: light = 3'b010;
+            GREEN: light = 3'b001;
+            default: light = 3'b000;
+        endcase
+    end
+endmodule
+```
+
+# Test Bench
+```verilog
+module tb_traffic_light;
+    reg clk, rst;
+    wire [2:0] light;
+
+    traffic_light_controller uut (.clk(clk), .rst(rst), .light(light));
+
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    initial begin
+        rst = 1;
+        #10 rst = 0;
+        #300 $finish;
+    end
+
+    initial begin
+        $monitor("Time=%0t | Light={Red,Yellow,Green}=%b", $time, light);
+    end
+endmodule
+```
 
 
 # output
+<img width="1920" height="1200" alt="Screenshot (45)" src="https://github.com/user-attachments/assets/8c6e625a-b3fa-4a6b-af72-2094883806d0" />
 
 
 # Result
+
+The Verilog code for the Traffic Light Controller was designed and simulated successfully. The output verified correct traffic light operation.
 
 
 
